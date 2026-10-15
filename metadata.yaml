@@ -1,0 +1,20 @@
+name: astrbot_plugin_nsfw_restorer
+display_name: NSFW 敏感词占位符还原器
+author: 唯笑 & 优可
+desc: 自动将输出文本中的敏感占位符还原为真实词汇，完美规避上游大模型 API 审核与 400 拦截。
+description: 通过在生成端使用代号占位符、在 AstrBot 输出层最终修饰管道无损还原真实词汇的架构设计，规避 Gemini 等大模型审查与 400 阻断，支持在 WebUI 自定义映射表。
+short_desc: 敏感占位符反混淆还原器
+version: 1.1.0
+category: 工具
+astrbot_version: ">=4.5.7"
+support_platforms:
+  - aiocqhttp
+  - qq_official
+  - telegram
+  - webchat
+tags:
+  - NSFW
+  - 占位符
+  - 反混淆
+  - 隐私保护
+requirements: []
