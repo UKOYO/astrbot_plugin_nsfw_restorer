@@ -591,7 +591,7 @@ class NSFWRestorerPlugin(Star):
         return new_text, count
 
     def _clean_content(self, content: Any) -> tuple[Any, int]:
-        """递归清洗 OpenAI 消息体、多模态列表，以及 tool_calls 参数字符串里的明文"""
+        """递归清洗 OpenAI 消息体、多模态列表、Pydantic/AstrBot 对象，以及 tool_calls 参数字符串里的明文"""
         total = 0
         if isinstance(content, str):
             new_val, c = self._obfuscate_text(content)
@@ -599,16 +599,9 @@ class NSFWRestorerPlugin(Star):
         if isinstance(content, list):
             new_list = []
             for item in content:
-                if isinstance(item, dict):
-                    cleaned, c = self._clean_content(item)
-                    total += c
-                    new_list.append(cleaned)
-                elif isinstance(item, str):
-                    new_text, c = self._obfuscate_text(item)
-                    total += c
-                    new_list.append(new_text)
-                else:
-                    new_list.append(item)
+                cleaned, c = self._clean_content(item)
+                total += c
+                new_list.append(cleaned)
             return new_list, total
         if isinstance(content, dict):
             new_dict = dict(content)
@@ -624,6 +617,16 @@ class NSFWRestorerPlugin(Star):
                     total += c
                     new_dict[key] = cleaned
             return new_dict, total
+        # 支持 AstrBot 的 TextPart / ContentPart 等 Pydantic 对象
+        if hasattr(content, "text") and isinstance(getattr(content, "text"), str):
+            cleaned_text, c = self._obfuscate_text(content.text)
+            if c > 0:
+                try:
+                    content.text = cleaned_text
+                    total += c
+                except Exception:
+                    pass
+            return content, total
         return content, 0
 
     @filter.on_llm_request(priority=-1000)
